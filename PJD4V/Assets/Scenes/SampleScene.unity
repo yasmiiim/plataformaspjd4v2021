@@ -638,8 +638,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocidade: 20
-  jumpForce: 5
-  jumpTime: 0
+  jumpForce: 50
+  jumpTime: 0.2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
