@@ -35,6 +35,8 @@ public class PlayerController : MonoBehaviour
 
     private bool _isMovingRight = true;
 
+    private Animator _animator;
+    
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -49,6 +51,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
+        
         _gameInput = new GameInput();
     }
 
@@ -57,6 +61,8 @@ public class PlayerController : MonoBehaviour
         _isGrounded = Physics2D.Linecast(transform.position,
             transform.position + groundCheck, groundMask);
         if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
+        
+        AnimationUpdate();
     }
 
     // Update is called once per frame
@@ -126,6 +132,13 @@ public class PlayerController : MonoBehaviour
         _isMovingRight = !_isMovingRight;
         transform.localScale = new Vector3(transform.localScale.x * -1,
             transform.localScale.y, transform.localScale.z);
+    }
+
+    private void AnimationUpdate()
+    {
+        _animator.SetFloat("Speed", Mathf.Abs(_playerMovement.x));
+        _animator.SetBool("IsGrounded", _isGrounded);
+        _animator.SetFloat("VertSpeed", _rigidbody2D.velocity.y);
     }
 
     private void OnDrawGizmos()
