@@ -15,7 +15,12 @@ public class PlayerController : MonoBehaviour
 
     public LayerMask groundMask;
 
+    public ContactFilter2D groundFilter;
+
     [SerializeField] private Vector3 groundCheck;
+
+    [SerializeField] private Vector3 boxSize;
+    
     
     [SerializeField] private PlayerInput playerInput;
 
@@ -58,8 +63,27 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        _isGrounded = Physics2D.Linecast(transform.position,
-            transform.position + groundCheck, groundMask);
+       // _isGrounded = Physics2D.Linecast(transform.position,
+       //     transform.position + groundCheck, groundMask);
+
+        _isGrounded = Physics2D.BoxCast(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+            boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
+
+        //RaycastHit2D[] hits = new RaycastHit2D[]{};
+
+        /*
+        int hitResults = Physics2D.BoxCast(
+            transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+            boxSize, 0, Vector2.up, groundFilter, hits, groundCheck.z);
+        if (hitResults > 0) _isGrounded = true;
+        */
+        
+        /*
+        int hitResults = Physics2D.BoxCastNonAlloc(
+            transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+            boxSize, 0, Vector2.up, hits, groundCheck.z, groundMask);
+        if (hitResults > 0) _isGrounded = true;
+        */
         if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
         
         AnimationUpdate();
@@ -75,7 +99,10 @@ public class PlayerController : MonoBehaviour
         Vector2 moviment = new Vector2(moverH, moverV);
         */
         
-        _rigidbody2D.AddForce(_playerMovement * velocidade);
+        //_rigidbody2D.AddForce(_playerMovement * velocidade);
+
+        _rigidbody2D.velocity = new Vector2(_playerMovement.x * velocidade * Time.fixedDeltaTime, _rigidbody2D.velocity.y);
+        
         if(_isMovingRight && _playerMovement.x < 0) Flip();
         if(!_isMovingRight && _playerMovement.x > 0) Flip();
         
@@ -122,7 +149,10 @@ public class PlayerController : MonoBehaviour
     {
         if (_doJump)
         {
-            _rigidbody2D.AddForce(Vector2.up * jumpForce);
+            //_rigidbody2D.AddForce(Vector2.up * jumpForce);
+
+            _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, jumpForce * Time.fixedDeltaTime);
+            
             if(Time.time - _startJumpTime > jumpTime) _doJump = false;
         }
     }
@@ -143,6 +173,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Debug.DrawLine(transform.position, transform.position + groundCheck, Color.red);
+        //Debug.DrawLine(transform.position, transform.position + groundCheck, Color.red);
+        Gizmos.color = Color.red;
+        Gizmos.DrawCube(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f), boxSize);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawCube(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y + groundCheck.z, 0f), boxSize);
     }
 }
