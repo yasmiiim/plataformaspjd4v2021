@@ -66,8 +66,8 @@ public class PlayerController : MonoBehaviour
        // _isGrounded = Physics2D.Linecast(transform.position,
        //     transform.position + groundCheck, groundMask);
 
-        _isGrounded = Physics2D.BoxCast(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
-            boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
+        //_isGrounded = Physics2D.BoxCast(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+        //    boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
 
         //RaycastHit2D[] hits = new RaycastHit2D[]{};
 
@@ -84,6 +84,23 @@ public class PlayerController : MonoBehaviour
             boxSize, 0, Vector2.up, hits, groundCheck.z, groundMask);
         if (hitResults > 0) _isGrounded = true;
         */
+        
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+            boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
+        _isGrounded = false;
+        if (hits.Length > 0)
+        {
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (Vector2.Angle(hit.normal, Vector2.up) < 20 &&
+                    hit.point.y < transform.position.y - 1.2f)
+                {
+                    _isGrounded = true;
+                    break;
+                }
+            }
+        }
+        
         if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
         
         AnimationUpdate();
