@@ -7,11 +7,15 @@ using UnityEngine.Serialization;
 public class MovingPlatformController : MonoBehaviour
 {
     public float moveSpeed;
+    public bool useTransform;
     
     [SerializeField] private Vector2 movePosition;
-
+    [SerializeField] private Transform moveDestination;
+    
     private Vector2 _initialPosition;
 
+    private Vector2 _moveTarget;
+    
     private Vector2 _currentMoveDirection;
     
     private bool _isReturning;
@@ -19,8 +23,16 @@ public class MovingPlatformController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (useTransform)
+        {
+            _moveTarget = moveDestination.localPosition;
+        }
+        else
+        {
+            _moveTarget = movePosition;
+        }
         _initialPosition = transform.position;
-        _currentMoveDirection = (_initialPosition + movePosition - (Vector2) transform.position).normalized;
+        _currentMoveDirection = (_initialPosition + _moveTarget - (Vector2) transform.position).normalized;
     }
 
     // Update is called once per frame
@@ -33,8 +45,8 @@ public class MovingPlatformController : MonoBehaviour
     {
         if (!_isReturning)
         {
-            Debug.Log(Vector2.Distance(transform.position, _initialPosition + movePosition));
-            if (Vector2.Distance(transform.position, _initialPosition + movePosition) < 1f)
+            Debug.Log(Vector2.Distance(transform.position, _initialPosition + _moveTarget));
+            if (Vector2.Distance(transform.position, _initialPosition + _moveTarget) < 1f)
             {
                 _isReturning = true;
                 _currentMoveDirection = (_initialPosition - (Vector2) transform.position).normalized;
@@ -45,7 +57,7 @@ public class MovingPlatformController : MonoBehaviour
             if (Vector2.Distance(transform.position, _initialPosition) < 1f)
             {
                 _isReturning = false;
-                _currentMoveDirection = (_initialPosition + movePosition - (Vector2) transform.position).normalized;
+                _currentMoveDirection = (_initialPosition + _moveTarget - (Vector2) transform.position).normalized;
             }
         }
 
@@ -70,6 +82,14 @@ public class MovingPlatformController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Debug.DrawLine(transform.position, transform.position + (Vector3)movePosition, Color.red);
+        if (useTransform)
+        {
+            Debug.DrawLine(transform.position, transform.position + moveDestination.localPosition, Color.yellow);
+        }
+        else
+        {
+            Debug.DrawLine(transform.position, transform.position + (Vector3)movePosition, Color.red);
+        }
+        
     }
 }
