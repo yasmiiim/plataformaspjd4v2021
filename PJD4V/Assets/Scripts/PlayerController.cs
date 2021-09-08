@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,6 +14,8 @@ public class PlayerController : MonoBehaviour
 
     public float jumpTime;
 
+    public LayerMask killMask;
+    
     public LayerMask groundMask;
 
     public ContactFilter2D groundFilter;
@@ -39,6 +42,10 @@ public class PlayerController : MonoBehaviour
     private bool _canDoubleJump;
 
     private bool _isMovingRight = true;
+
+    private bool _active = true;
+
+    private bool _dead;
 
     private Animator _animator;
     
@@ -84,26 +91,29 @@ public class PlayerController : MonoBehaviour
             boxSize, 0, Vector2.up, hits, groundCheck.z, groundMask);
         if (hitResults > 0) _isGrounded = true;
         */
-        
-        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
-            boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
-        _isGrounded = false;
-        if (hits.Length > 0)
+        if (_active)
         {
-            foreach (RaycastHit2D hit in hits)
+            RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
+                boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
+            _isGrounded = false;
+            if (hits.Length > 0)
             {
-                if (Vector2.Angle(hit.normal, Vector2.up) < 20 &&
-                    hit.point.y < transform.position.y - 1.2f)
+                foreach (RaycastHit2D hit in hits)
                 {
-                    _isGrounded = true;
-                    break;
+                    if (Vector2.Angle(hit.normal, Vector2.up) < 20 &&
+                        hit.point.y < transform.position.y - 1.2f)
+                    {
+                        _isGrounded = true;
+                        break;
+                    }
                 }
             }
+            
+            if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
+            
+            AnimationUpdate();
         }
         
-        if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
-        
-        AnimationUpdate();
     }
 
     // Update is called once per frame
@@ -118,48 +128,73 @@ public class PlayerController : MonoBehaviour
         
         //_rigidbody2D.AddForce(_playerMovement * velocidade);
 
-        _rigidbody2D.velocity = new Vector2(_playerMovement.x * velocidade * Time.fixedDeltaTime, _rigidbody2D.velocity.y);
+        if (_active)
+        {
+            _rigidbody2D.velocity = new Vector2(_playerMovement.x * velocidade * Time.fixedDeltaTime, _rigidbody2D.velocity.y);
+                    
+            if(_isMovingRight && _playerMovement.x < 0) Flip();
+            if(!_isMovingRight && _playerMovement.x > 0) Flip();
+            
+            
+            Jump();
+        }
         
-        if(_isMovingRight && _playerMovement.x < 0) Flip();
-        if(!_isMovingRight && _playerMovement.x > 0) Flip();
-        
-        
-        Jump();
     }
     
     private void OnActionTriggered(InputAction.CallbackContext obj)
     {
-        if (obj.action.name == _gameInput.Gameplay.Move.name)
+        if (_active)
         {
-            _playerMovement = obj.ReadValue<Vector2>();
-            _playerMovement.y = 0;
-        }
-
-        if (obj.action.name == _gameInput.Gameplay.Jump.name)
-        {
-            if (obj.started)
+            if (obj.action.name == _gameInput.Gameplay.Move.name)
             {
-                if(_isGrounded)
+                _playerMovement = obj.ReadValue<Vector2>();
+                _playerMovement.y = 0;
+            }
+    
+            if (obj.action.name == _gameInput.Gameplay.Jump.name)
+            {
+                if (obj.started)
                 {
-                    _doJump = true;
-                    _startJumpTime = Time.time;
-                }
-                else
-                {
-                    if (_canDoubleJump)
+                    if(_isGrounded)
                     {
                         _doJump = true;
                         _startJumpTime = Time.time;
-                        _canDoubleJump = false;
+                    }
+                    else
+                    {
+                        if (_canDoubleJump)
+                        {
+                            _doJump = true;
+                            _startJumpTime = Time.time;
+                            _canDoubleJump = false;
+                        }
                     }
                 }
-            }
-
-            if (obj.canceled)
-            {
-                _doJump = false;
+    
+                if (obj.canceled)
+                {
+                    _doJump = false;
+                }
             }
         }
+        else
+        {
+            if (_dead) 
+            {
+                if (obj.action.name == _gameInput.Gameplay.Jump.name)
+                {
+                    if(obj.performed) GameManager.Instance.ResetCurrentLevel();
+                }
+            }
+            else
+            {
+                if (obj.action.name == _gameInput.Gameplay.Jump.name)
+                {
+                    if(obj.performed) GameManager.Instance.LoadLevel2();
+                }
+            }
+        }
+        
     }
 
     private void Jump()
@@ -186,6 +221,45 @@ public class PlayerController : MonoBehaviour
         _animator.SetFloat("Speed", Mathf.Abs(_playerMovement.x));
         _animator.SetBool("IsGrounded", _isGrounded);
         _animator.SetFloat("VertSpeed", _rigidbody2D.velocity.y);
+    }
+
+    private void KillPlayer()
+    {
+        _active = false;
+        _dead = true;
+
+        _rigidbody2D.bodyType = RigidbodyType2D.Static;
+        
+        _animator.SetBool("Active", _active);
+        _animator.Play("Dead");
+    }
+
+    private void PlayerVictory()
+    {
+        _active = false;
+        
+        _rigidbody2D.velocity = Vector2.zero;
+        _playerMovement = Vector2.zero;
+        
+        _animator.SetBool("Active", _active);
+        _animator.Play("Victory");
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Kill"))
+        {
+            if(other.contacts.Any(contact => Vector2.Angle(contact.normal, Vector2.up) < 20))
+                KillPlayer();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Victory"))
+        {
+            PlayerVictory();
+        }
     }
 
     private void OnDrawGizmos()

@@ -45,7 +45,6 @@ public class MovingPlatformController : MonoBehaviour
     {
         if (!_isReturning)
         {
-            Debug.Log(Vector2.Distance(transform.position, _initialPosition + _moveTarget));
             if (Vector2.Distance(transform.position, _initialPosition + _moveTarget) < 1f)
             {
                 _isReturning = true;
