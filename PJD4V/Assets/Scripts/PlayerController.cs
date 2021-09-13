@@ -183,14 +183,14 @@ public class PlayerController : MonoBehaviour
             {
                 if (obj.action.name == _gameInput.Gameplay.Jump.name)
                 {
-                    if(obj.performed) GameManager.Instance.ResetCurrentLevel();
+                    if(obj.performed) GameManager.Instance.ProcessDeath();
                 }
             }
             else
             {
                 if (obj.action.name == _gameInput.Gameplay.Jump.name)
                 {
-                    if(obj.performed) GameManager.Instance.LoadLevel2();
+                    if(obj.performed) GameManager.Instance.LoadNextLevel();
                 }
             }
         }
