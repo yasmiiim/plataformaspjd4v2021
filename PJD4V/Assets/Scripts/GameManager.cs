@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public float Lives;
+    public int Lives;
 
     private void Awake()
     {
@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        HUDObserverManager.LivesChangedChannel(Lives);
+    }
+
     private void Update()
     {
         if (Keyboard.current.spaceKey.wasPressedThisFrame && Lives <0)
@@ -35,7 +40,8 @@ public class GameManager : MonoBehaviour
     public void ProcessDeath()
     {
         Lives--;
-
+        HUDObserverManager.LivesChangedChannel(Lives);
+        
         if (Lives < 0)
         {
             LoadGameOver();
@@ -59,6 +65,7 @@ public class GameManager : MonoBehaviour
             {
                 LoadLevel1();
                 Lives = 3;
+                HUDObserverManager.LivesChangedChannel(Lives);
             }
         }
         
