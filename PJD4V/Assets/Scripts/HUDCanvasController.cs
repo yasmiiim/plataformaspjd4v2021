@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,19 @@ using UnityEngine;
 public class HUDCanvasController : MonoBehaviour
 {
     public static HUDCanvasController Instance;
+
+    public GameObject livesObject;
+    public GameObject energyBarObject;
+
+    private void OnEnable()
+    {
+        HUDObserverManager.ONActivateHUD += OnActivateHUD;
+    }
+
+    private void OnDisable()
+    {
+        HUDObserverManager.ONActivateHUD -= OnActivateHUD;
+    }
 
     private void Awake()
     {
@@ -17,5 +31,11 @@ public class HUDCanvasController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+    
+    private void OnActivateHUD(bool obj)
+    {
+        livesObject.SetActive(obj);
+        energyBarObject.SetActive(obj);
     }
 }

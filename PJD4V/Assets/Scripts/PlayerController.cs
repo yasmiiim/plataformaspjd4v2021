@@ -8,6 +8,12 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
 
+    public int maxEnergy;
+
+    public float spendRate;
+
+    public float energyBitRecover;
+    
     public float velocidade;
 
     public float jumpForce;
@@ -48,6 +54,8 @@ public class PlayerController : MonoBehaviour
     private bool _dead;
 
     private Animator _animator;
+
+    private float _currentEnergy;
     
     private void OnEnable()
     {
@@ -66,6 +74,8 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
         
         _gameInput = new GameInput();
+
+        _currentEnergy = maxEnergy;
     }
 
     private void Update()
@@ -112,6 +122,8 @@ public class PlayerController : MonoBehaviour
             if(!_canDoubleJump && _isGrounded) _canDoubleJump = _isGrounded;
             
             AnimationUpdate();
+            
+            SpendEnergy();
         }
         
     }
@@ -140,7 +152,7 @@ public class PlayerController : MonoBehaviour
         }
         
     }
-    
+
     private void OnActionTriggered(InputAction.CallbackContext obj)
     {
         if (_active)
@@ -232,6 +244,8 @@ public class PlayerController : MonoBehaviour
         
         _animator.SetBool("Active", _active);
         _animator.Play("Dead");
+        
+        HUDObserverManager.PlayerDeath(true);
     }
 
     private void PlayerVictory()
@@ -243,6 +257,8 @@ public class PlayerController : MonoBehaviour
         
         _animator.SetBool("Active", _active);
         _animator.Play("Victory");
+
+        HUDObserverManager.PlayerVictory(true);
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -260,6 +276,28 @@ public class PlayerController : MonoBehaviour
         {
             PlayerVictory();
         }
+
+        if (other.CompareTag("EnergyBit"))
+        {
+            _currentEnergy += energyBitRecover;
+            HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+            
+            Destroy(other.gameObject);
+        }
+    }
+
+    private void SpendEnergy()
+    {
+        _currentEnergy -= spendRate * Time.deltaTime;
+
+        if (_currentEnergy < 0)
+        {
+            _currentEnergy = 0;
+            KillPlayer();
+        }
+        if (_currentEnergy > maxEnergy) _currentEnergy = maxEnergy;
+        
+        HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
     }
 
     private void OnDrawGizmos()
