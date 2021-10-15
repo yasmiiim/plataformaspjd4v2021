@@ -7,6 +7,9 @@ TagManager:
   - Kill
   - Victory
   - EnergyBit
+  - TakeEnergy
+  - ExtraLife
+  - PlayerBullet
   layers:
   - Default
   - TransparentFX

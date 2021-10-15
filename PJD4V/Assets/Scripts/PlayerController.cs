@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
 
     public float jumpTime;
 
+    public float jetpackForce;
+
     public LayerMask killMask;
     
     public LayerMask groundMask;
@@ -30,9 +32,16 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private Vector3 boxSize;
     
-    
     [SerializeField] private PlayerInput playerInput;
 
+    [SerializeField] private GameObject jetEffect;
+
+    [SerializeField] private GameObject bulletPrefab;
+
+    [SerializeField] private GameObject muzzlePrefab;
+
+    [SerializeField] private Transform shootOrigin;
+    
     private GameInput _gameInput;
     
     private Rigidbody2D _rigidbody2D;
@@ -56,6 +65,13 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
 
     private float _currentEnergy;
+
+    private bool _canJetpack;
+
+    private bool _isJetpacking;
+
+    private bool _isShooting;
+    private bool _shotMade;
     
     private void OnEnable()
     {
@@ -124,6 +140,7 @@ public class PlayerController : MonoBehaviour
             AnimationUpdate();
             
             SpendEnergy();
+            Shooting();
         }
         
     }
@@ -149,6 +166,7 @@ public class PlayerController : MonoBehaviour
             
             
             Jump();
+            Jetpack();
         }
         
     }
@@ -174,11 +192,20 @@ public class PlayerController : MonoBehaviour
                     }
                     else
                     {
+                        if (_canJetpack)
+                        {
+                            _canJetpack = false;
+                            _isJetpacking = true;
+                            jetEffect.SetActive(true);
+                        }
+                        
                         if (_canDoubleJump)
                         {
                             _doJump = true;
                             _startJumpTime = Time.time;
                             _canDoubleJump = false;
+                            
+                            _canJetpack = true;
                         }
                     }
                 }
@@ -186,8 +213,23 @@ public class PlayerController : MonoBehaviour
                 if (obj.canceled)
                 {
                     _doJump = false;
+
+                    if (_isJetpacking)
+                    {
+                        _isJetpacking = false;
+                        jetEffect.SetActive(false);
+                    }
                 }
             }
+
+            if (obj.action.name == _gameInput.Gameplay.Fire.name)
+            {
+                if (obj.performed)
+                {
+                    ShootBullet();
+                }
+            }
+            
         }
         else
         {
@@ -221,6 +263,54 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void Jetpack()
+    {
+        if (_isJetpacking)
+        {
+            _rigidbody2D.AddForce(Vector2.up * jetpackForce * Time.fixedDeltaTime);
+            if (_isGrounded)
+            {
+                _isJetpacking = false;
+                jetEffect.SetActive(false);
+            }
+        }
+    }
+
+    private void ShootBullet()
+    {
+        if (!_isShooting && !_shotMade)
+        {
+            _animator.SetTrigger("ShootBullet");
+            _isShooting = true;
+        }
+    }
+
+    private void Shooting()
+    {
+        if (_isShooting)
+        {
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("JumpShoot") ||
+                _animator.GetCurrentAnimatorStateInfo(0).IsName("IdleShoot") ||
+                _animator.GetCurrentAnimatorStateInfo(0).IsName("WalkShoot"))
+            {
+                GameObject newBullet = Instantiate(bulletPrefab, shootOrigin.transform.position, Quaternion.identity);
+                newBullet.transform.localScale = transform.localScale;
+
+                GameObject muzzle = Instantiate(muzzlePrefab, shootOrigin.transform.position, Quaternion.identity);
+                _isShooting = false;
+                _shotMade = true;
+            }
+        } else if (_shotMade)
+        {
+            if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("JumpShoot") &&
+                !_animator.GetCurrentAnimatorStateInfo(0).IsName("IdleShoot") &&
+                !_animator.GetCurrentAnimatorStateInfo(0).IsName("WalkShoot"))
+            {
+                _shotMade = false;
+            }
+        }
+    }
+    
     private void Flip()
     {
         _isMovingRight = !_isMovingRight;
@@ -246,6 +336,7 @@ public class PlayerController : MonoBehaviour
         _animator.Play("Dead");
         
         HUDObserverManager.PlayerDeath(true);
+        jetEffect.SetActive(false);
     }
 
     private void PlayerVictory()
@@ -259,6 +350,7 @@ public class PlayerController : MonoBehaviour
         _animator.Play("Victory");
 
         HUDObserverManager.PlayerVictory(true);
+        jetEffect.SetActive(false);
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -267,6 +359,12 @@ public class PlayerController : MonoBehaviour
         {
             if(other.contacts.Any(contact => Vector2.Angle(contact.normal, Vector2.up) < 20))
                 KillPlayer();
+        }
+
+        if (other.gameObject.CompareTag("TakeEnergy"))
+        {
+            _currentEnergy -= energyBitRecover;
+            HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
         }
     }
 
@@ -281,6 +379,13 @@ public class PlayerController : MonoBehaviour
         {
             _currentEnergy += energyBitRecover;
             HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+            
+            Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("ExtraLife"))
+        {
+            GameManager.Instance.AddLife(1);
             
             Destroy(other.gameObject);
         }

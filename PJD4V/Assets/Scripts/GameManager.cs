@@ -26,9 +26,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        LoadLevel1();
-        HUDObserverManager.ActivateHUD(true);
-        HUDObserverManager.LivesChangedChannel(Lives);
+        LoadMainMenu();
+        
     }
 
     private void Update()
@@ -36,7 +35,6 @@ public class GameManager : MonoBehaviour
         if (Keyboard.current.spaceKey.wasPressedThisFrame && Lives <0)
         {
             LoadNextLevel();
-            HUDObserverManager.ActivateHUD(true);
         }
     }
 
@@ -68,9 +66,9 @@ public class GameManager : MonoBehaviour
         {
             if (SceneManager.GetActiveScene().name == "GameOver")
             {
-                LoadLevel1();
-                Lives = 3;
-                HUDObserverManager.LivesChangedChannel(Lives);
+               LoadMainMenu();
+               // Lives = 3;
+               // HUDObserverManager.LivesChangedChannel(Lives);
             }
         }
         
@@ -95,5 +93,24 @@ public class GameManager : MonoBehaviour
     {
         HUDObserverManager.ActivateHUD(false);
         SceneManager.LoadScene("GameOver");
+    }
+
+    public void AddLife(int value)
+    {
+        Lives += value;
+        HUDObserverManager.LivesChangedChannel(Lives);
+    }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void InitializeGame()
+    {
+        HUDObserverManager.ActivateHUD(true);
+        HUDObserverManager.LivesChangedChannel(Lives);
+        Lives = 3;
+        HUDObserverManager.LivesChangedChannel(Lives);
     }
 }

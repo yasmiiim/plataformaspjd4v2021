@@ -8,6 +8,7 @@ public class MovingPlatformController : MonoBehaviour
 {
     public float moveSpeed;
     public bool useTransform;
+    public bool shouldFlip;
     
     [SerializeField] private Vector2 movePosition;
     [SerializeField] private Transform moveDestination;
@@ -19,10 +20,14 @@ public class MovingPlatformController : MonoBehaviour
     private Vector2 _currentMoveDirection;
     
     private bool _isReturning;
+
+    private float _originalLocalScaleX;
     
     // Start is called before the first frame update
     void Start()
     {
+        if (shouldFlip) _originalLocalScaleX = transform.localScale.x;
+        
         if (useTransform)
         {
             _moveTarget = moveDestination.localPosition;
@@ -58,6 +63,15 @@ public class MovingPlatformController : MonoBehaviour
                 _isReturning = false;
                 _currentMoveDirection = (_initialPosition + _moveTarget - (Vector2) transform.position).normalized;
             }
+        }
+
+        if (shouldFlip)
+        {
+            if (_isReturning)
+                transform.localScale =
+                    new Vector3(-_originalLocalScaleX, transform.localScale.y, transform.localScale.z);
+            else
+                transform.localScale = new Vector3(_originalLocalScaleX, transform.localScale.y, transform.localScale.z);
         }
 
         transform.position += (Vector3)_currentMoveDirection * moveSpeed * Time.deltaTime;
