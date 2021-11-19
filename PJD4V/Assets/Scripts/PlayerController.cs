@@ -22,6 +22,10 @@ public class PlayerController : MonoBehaviour
 
     public float jetpackForce;
 
+    public float knockbackForce;
+
+    public float knockbackTime;
+
     public LayerMask killMask;
     
     public LayerMask groundMask;
@@ -73,6 +77,8 @@ public class PlayerController : MonoBehaviour
     private bool _isShooting;
     private bool _shotMade;
     
+    private bool _onKnockback;
+    private float _currentKnockbackTime;
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -159,10 +165,22 @@ public class PlayerController : MonoBehaviour
 
         if (_active)
         {
-            _rigidbody2D.velocity = new Vector2(_playerMovement.x * velocidade * Time.fixedDeltaTime, _rigidbody2D.velocity.y);
+            if (!_onKnockback)
+            {
+                _rigidbody2D.velocity = new Vector2(_playerMovement.x * velocidade * Time.fixedDeltaTime, _rigidbody2D.velocity.y);
                     
-            if(_isMovingRight && _playerMovement.x < 0) Flip();
-            if(!_isMovingRight && _playerMovement.x > 0) Flip();
+                if(_isMovingRight && _playerMovement.x < 0) Flip();
+                if(!_isMovingRight && _playerMovement.x > 0) Flip();
+            }
+            else
+            {
+                _currentKnockbackTime -= Time.fixedDeltaTime;
+                if (_currentKnockbackTime < 0)
+                {
+                    _onKnockback = false;
+                    _currentKnockbackTime = knockbackTime;
+                }
+            }
             
             
             Jump();
@@ -353,6 +371,12 @@ public class PlayerController : MonoBehaviour
         jetEffect.SetActive(false);
     }
 
+    private void KnockbackPlayer(Vector2 direction, float forceMultiplier)
+    {
+        _rigidbody2D.AddForce(direction * forceMultiplier * knockbackForce, ForceMode2D.Impulse);
+        _onKnockback = true;
+    }
+    
     private void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.CompareTag("Kill"))
@@ -365,6 +389,13 @@ public class PlayerController : MonoBehaviour
         {
             _currentEnergy -= energyBitRecover;
             HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+
+            if(_isMovingRight)
+                KnockbackPlayer(Vector2.left + Vector2.up, 1);
+            else
+            {
+                KnockbackPlayer(Vector2.right + Vector2.up, 1);
+            }
         }
     }
 

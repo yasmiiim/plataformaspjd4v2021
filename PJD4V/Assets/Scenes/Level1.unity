@@ -909,41 +909,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.07185559, y: -0.08790398, z: -10}
+  m_LocalPosition: {x: -0.07186006, y: -0.08790302, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &552126089
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 552126090}
-  m_Layer: 0
-  m_Name: ShootOrigin
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &552126090
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 552126089}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 497595160}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &574133433
 PrefabInstance:
@@ -1466,7 +1436,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1048599143}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.06941609, y: -2.0742178, z: -10}
+  m_LocalPosition: {x: -0.0694177, y: -2.0742178, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 68871097}
@@ -6485,22 +6455,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5588797577874396015, guid: d8c766ee7f08f714cbffac80e8dc85c2, type: 3}
-      propertyPath: shootOrigin
-      value: 
-      objectReference: {fileID: 552126090}
-    - target: {fileID: 5588797577874396015, guid: d8c766ee7f08f714cbffac80e8dc85c2, type: 3}
-      propertyPath: bulletOrigin
-      value: 
-      objectReference: {fileID: 552126090}
-    - target: {fileID: 5588797577874396015, guid: d8c766ee7f08f714cbffac80e8dc85c2, type: 3}
-      propertyPath: bulletPrefab
-      value: 
-      objectReference: {fileID: 8661046451852923053, guid: 7da43434d7a7f2646a87091ba61c5b1d, type: 3}
-    - target: {fileID: 5588797577874396015, guid: d8c766ee7f08f714cbffac80e8dc85c2, type: 3}
-      propertyPath: muzzlePrefab
-      value: 
-      objectReference: {fileID: 5539566244085438294, guid: 221359b06c1b7cb45a4bd88c068fead5, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d8c766ee7f08f714cbffac80e8dc85c2, type: 3}
 --- !u!1001 &6860533512821514735
@@ -6567,6 +6521,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3196152322748715750, guid: a37d6f2153504c84faf71d5ca23f3d9f, type: 3}
+      propertyPath: maxEnergy
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 8249972171132823332, guid: a37d6f2153504c84faf71d5ca23f3d9f, type: 3}
       propertyPath: m_Name
       value: DinoEnemy
