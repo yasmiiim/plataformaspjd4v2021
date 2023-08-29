@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -45,6 +46,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject muzzlePrefab;
 
     [SerializeField] private Transform shootOrigin;
+
+    [SerializeField] private List<AudioClip> playerSFX;
+
+    [SerializeField] private List<AudioMixerGroup> mixerGroups;
+
+    [SerializeField] private AudioSource normalSFXSource;
+    [SerializeField] private AudioSource lowSFXSource;
+    [SerializeField] private AudioSource jetpackSFXSource;
+    
     
     private GameInput _gameInput;
     
@@ -79,6 +89,7 @@ public class PlayerController : MonoBehaviour
     
     private bool _onKnockback;
     private float _currentKnockbackTime;
+
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -125,6 +136,8 @@ public class PlayerController : MonoBehaviour
         */
         if (_active)
         {
+            bool previousGrounded = _isGrounded;
+            
             RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position + new Vector3(groundCheck.x * transform.localScale.x, groundCheck.y, 0f),
                 boxSize, 0f, Vector2.up, groundCheck.z, groundMask);
             _isGrounded = false;
@@ -136,6 +149,13 @@ public class PlayerController : MonoBehaviour
                         hit.point.y < transform.position.y - 1.2f)
                     {
                         _isGrounded = true;
+                        
+                        if (!previousGrounded)
+                        {
+                            lowSFXSource.PlayOneShot(playerSFX[3]);
+                        }
+
+                        
                         break;
                     }
                 }
@@ -207,6 +227,7 @@ public class PlayerController : MonoBehaviour
                     {
                         _doJump = true;
                         _startJumpTime = Time.time;
+                        normalSFXSource.PlayOneShot(playerSFX[0]);
                     }
                     else
                     {
@@ -215,6 +236,7 @@ public class PlayerController : MonoBehaviour
                             _canJetpack = false;
                             _isJetpacking = true;
                             jetEffect.SetActive(true);
+                            jetpackSFXSource.Play();
                         }
                         
                         if (_canDoubleJump)
@@ -222,6 +244,7 @@ public class PlayerController : MonoBehaviour
                             _doJump = true;
                             _startJumpTime = Time.time;
                             _canDoubleJump = false;
+                            normalSFXSource.PlayOneShot(playerSFX[0]);
                             
                             _canJetpack = true;
                         }
@@ -236,6 +259,7 @@ public class PlayerController : MonoBehaviour
                     {
                         _isJetpacking = false;
                         jetEffect.SetActive(false);
+                        jetpackSFXSource.Stop();
                     }
                 }
             }
@@ -290,6 +314,7 @@ public class PlayerController : MonoBehaviour
             {
                 _isJetpacking = false;
                 jetEffect.SetActive(false);
+                jetpackSFXSource.Stop();
             }
         }
     }
@@ -300,6 +325,8 @@ public class PlayerController : MonoBehaviour
         {
             _animator.SetTrigger("ShootBullet");
             _isShooting = true;
+            
+            normalSFXSource.PlayOneShot(playerSFX[1]);
         }
     }
 
@@ -411,6 +438,8 @@ public class PlayerController : MonoBehaviour
             _currentEnergy += energyBitRecover;
             HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
             
+            
+            normalSFXSource.PlayOneShot(playerSFX[2]);
             Destroy(other.gameObject);
         }
 
