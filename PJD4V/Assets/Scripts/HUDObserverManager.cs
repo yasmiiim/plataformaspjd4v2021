@@ -46,4 +46,11 @@ public static class HUDObserverManager
     {
         ONCoinsChanged?.Invoke(coins);
     }
+
+    public static event Action<bool> ONKeyChanged;
+
+    public static void KeyChanged(bool key)
+    {
+        ONKeyChanged?.Invoke(key);
+    }
 }

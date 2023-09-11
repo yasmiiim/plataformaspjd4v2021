@@ -99,6 +99,8 @@ public class PlayerController : MonoBehaviour
     
     private SpriteRenderer _spriteRenderer;
 
+    private bool _hasKey;
+
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -123,7 +125,10 @@ public class PlayerController : MonoBehaviour
         
         _coins = 0;
         HUDObserverManager.CoinsChanged(_coins);
-        
+
+        _hasKey = false;
+        HUDObserverManager.KeyChanged(_hasKey);
+
     }
 
     private void Update()
@@ -524,6 +529,28 @@ public class PlayerController : MonoBehaviour
             HUDObserverManager.CoinsChanged(_coins);
             normalSFXSource.PlayOneShot(playerSFX[4]);
             Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("Key"))
+        {
+            if (!_hasKey)
+            {
+                _hasKey = true;
+                HUDObserverManager.KeyChanged(_hasKey);
+                normalSFXSource.PlayOneShot(playerSFX[8]);
+                Destroy(other.gameObject);
+            }
+            
+        }
+
+        if (other.CompareTag("Door"))
+        {
+            if (_hasKey)
+            {
+                other.GetComponent<KeyDoorController>().UseKey();
+                _hasKey = false;
+                HUDObserverManager.KeyChanged(_hasKey);
+            }
         }
     }
 
