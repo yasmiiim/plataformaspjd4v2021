@@ -11,6 +11,8 @@ TagManager:
   - ExtraLife
   - PlayerBullet
   - Coin
+  - Enemy
+  - Ground
   layers:
   - Default
   - TransparentFX

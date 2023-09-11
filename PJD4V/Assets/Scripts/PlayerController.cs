@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public int bulletDamage;
 
     public int maxEnergy;
 
@@ -26,6 +27,8 @@ public class PlayerController : MonoBehaviour
     public float knockbackForce;
 
     public float knockbackTime;
+
+    public float immuneTime;
 
     public LayerMask killMask;
     
@@ -92,6 +95,10 @@ public class PlayerController : MonoBehaviour
 
     private int _coins;
 
+    private float _lastImmuneTime;
+    
+    private SpriteRenderer _spriteRenderer;
+
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -107,10 +114,16 @@ public class PlayerController : MonoBehaviour
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
         
         _gameInput = new GameInput();
 
         _currentEnergy = maxEnergy;
+        HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+        
+        _coins = 0;
+        HUDObserverManager.CoinsChanged(_coins);
+        
     }
 
     private void Update()
@@ -343,6 +356,7 @@ public class PlayerController : MonoBehaviour
             {
                 GameObject newBullet = Instantiate(bulletPrefab, shootOrigin.transform.position, Quaternion.identity);
                 newBullet.transform.localScale = transform.localScale;
+                newBullet.gameObject.GetComponent<BulletController>().damage = bulletDamage;
 
                 GameObject muzzle = Instantiate(muzzlePrefab, shootOrigin.transform.position, Quaternion.identity);
                 _isShooting = false;
@@ -375,17 +389,29 @@ public class PlayerController : MonoBehaviour
 
     private void KillPlayer()
     {
-        _active = false;
-        _dead = true;
+        if (_active)
+        {
+            normalSFXSource.PlayOneShot(playerSFX[6]);
+        
+            _active = false;
+            _dead = true;
 
-        //_rigidbody2D.bodyType = RigidbodyType2D.Static;
-        _rigidbody2D.velocity = new Vector2(0, _rigidbody2D.velocity.y);
+            //_rigidbody2D.bodyType = RigidbodyType2D.Static;
+            _rigidbody2D.velocity = new Vector2(0, _rigidbody2D.velocity.y);
         
-        _animator.SetBool("Active", _active);
-        _animator.Play("Dead");
+            _animator.SetBool("Active", _active);
+            _animator.Play("Dead");
         
-        HUDObserverManager.PlayerDeath(true);
-        jetEffect.SetActive(false);
+            HUDObserverManager.PlayerDeath(true);
+       
+            if (_isJetpacking)
+            {
+                _isJetpacking = false;
+                jetEffect.SetActive(false);
+                jetpackSFXSource.Stop();
+            }
+        }
+        
     }
 
     private void PlayerVictory()
@@ -407,6 +433,49 @@ public class PlayerController : MonoBehaviour
         _rigidbody2D.AddForce(direction * forceMultiplier * knockbackForce, ForceMode2D.Impulse);
         _onKnockback = true;
     }
+
+    public void TakeDamage(int damage)
+    {
+        if (_active && _lastImmuneTime + immuneTime< Time.time)
+        {
+            _currentEnergy = Mathf.Clamp(_currentEnergy - damage, 0, maxEnergy);
+            HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+
+            
+            _lastImmuneTime = Time.time;
+            
+            if (_currentEnergy <= 0)
+            {
+                KillPlayer();
+                return;
+            }
+            else
+            {
+                normalSFXSource.PlayOneShot(playerSFX[5]);
+                StartCoroutine(ImmuneBlink());
+            }
+        
+            if(_isMovingRight)
+                KnockbackPlayer(Vector2.left + Vector2.up, 1);
+            else
+            {
+                KnockbackPlayer(Vector2.right + Vector2.up, 1);
+            }
+        }
+        
+    }
+    
+    private IEnumerator ImmuneBlink()
+    {
+        while (_lastImmuneTime + immuneTime > Time.time)
+        {
+            _spriteRenderer.color = Color.clear;
+            yield return new WaitForSeconds(0.1f);
+            _spriteRenderer.color = Color.white;
+            yield return new WaitForSeconds(0.1f);
+        }
+        
+    }
     
     private void OnCollisionEnter2D(Collision2D other)
     {
@@ -416,19 +485,6 @@ public class PlayerController : MonoBehaviour
             {
                 if(other.contacts.Any(contact => Vector2.Angle(contact.normal, Vector2.up) < 20))
                     KillPlayer();
-            }
-
-            if (other.gameObject.CompareTag("TakeEnergy"))
-            {
-                _currentEnergy -= energyBitRecover;
-                HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
-
-                if(_isMovingRight)
-                    KnockbackPlayer(Vector2.left + Vector2.up, 1);
-                else
-                {
-                    KnockbackPlayer(Vector2.right + Vector2.up, 1);
-                }
             }
         }
     }
@@ -458,7 +514,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("ExtraLife"))
         {
             GameManager.Instance.AddLife(1);
-            
+            normalSFXSource.PlayOneShot(playerSFX[7]);
             Destroy(other.gameObject);
         }
 

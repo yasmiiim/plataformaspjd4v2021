@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 public class EnemyController : MonoBehaviour
 {
     public int maxEnergy;
-    
+    public int damage;
     public float moveSpeed;
     public bool useTransform;
     public bool shouldFlip;
@@ -26,10 +26,24 @@ public class EnemyController : MonoBehaviour
     private float _originalLocalScaleX;
     
     private int _currentEnergy;
+
+    private Animator _animator;
+
+    private bool _isAlive;
+
+    private Collider2D _collider2D;
+    
+    private AudioSource _audioSource;
     
     // Start is called before the first frame update
     void Start()
     {
+        _animator = GetComponent<Animator>();
+        _collider2D = GetComponent<Collider2D>();
+        _audioSource = GetComponent<AudioSource>();
+
+        _isAlive = true;
+        
         if (shouldFlip) _originalLocalScaleX = transform.localScale.x;
         
         if (useTransform)
@@ -49,7 +63,7 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MovePlatform();
+        if(_isAlive) MovePlatform();
     }
 
     private void MovePlatform()
@@ -83,7 +97,7 @@ public class EnemyController : MonoBehaviour
         transform.position += (Vector3)_currentMoveDirection * moveSpeed * Time.deltaTime;
     }
 
-    private void TakeEnergy(int damage)
+    public void TakeEnergy(int damage)
     {
         _currentEnergy -= damage;
 
@@ -91,19 +105,14 @@ public class EnemyController : MonoBehaviour
         {
             //TODO: Gerenciar morte  do inimigo
             _currentEnergy = 0;
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            _isAlive = false;
+            _collider2D.enabled = false;
+            _animator.Play("Dead");
+            _audioSource.Play();
         }
 
         if (_currentEnergy > maxEnergy) _currentEnergy = maxEnergy;
-    }
-    
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("PlayerBullet"))
-        {
-            TakeEnergy(10);
-            Destroy(other.gameObject);
-        }
     }
 
     private void OnDrawGizmos()
@@ -117,5 +126,13 @@ public class EnemyController : MonoBehaviour
             Debug.DrawLine(transform.position, transform.position + (Vector3)movePosition, Color.red);
         }
         
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            other.gameObject.GetComponent<PlayerController>().TakeDamage(damage);
+        }
     }
 }

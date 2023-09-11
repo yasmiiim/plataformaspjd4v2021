@@ -289,6 +289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae9430d47bf0447cc8f0d9718d028bce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bulletDamage: 5
   maxEnergy: 100
   spendRate: 0
   energyBitRecover: 20
@@ -298,6 +299,7 @@ MonoBehaviour:
   jetpackForce: 800
   knockbackForce: 5
   knockbackTime: 0.5
+  immuneTime: 0.5
   killMask:
     serializedVersion: 2
     m_Bits: 0
@@ -331,6 +333,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: db99dc636514b4109acb3b02fd652c66, type: 3}
   - {fileID: 8300000, guid: 9e7406570fa224b65beed045b97f6443, type: 3}
   - {fileID: 8300000, guid: dffc4aefc56344cadb763ea94950c9ab, type: 3}
+  - {fileID: 8300000, guid: d8d24bb17e0504f76a67a8565eb24ac1, type: 3}
   mixerGroups:
   - {fileID: 8699764655662338294, guid: 47801cd5ad6274298938f436b89092bc, type: 2}
   - {fileID: 7106883563200798964, guid: 47801cd5ad6274298938f436b89092bc, type: 2}
