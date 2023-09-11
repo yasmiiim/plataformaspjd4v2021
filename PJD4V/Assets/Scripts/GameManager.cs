@@ -103,7 +103,8 @@ public class GameManager : MonoBehaviour
 
     public void LoadMainMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadSceneAsync("Initialize").completed += (op) => { SceneManager.LoadScene("MainMenu"); };
+       // SceneManager.LoadScene("MainMenu");
     }
 
     public void InitializeGame()

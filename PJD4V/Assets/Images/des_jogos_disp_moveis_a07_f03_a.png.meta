@@ -72,6 +72,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -496,6 +497,23 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      des_jogos_disp_moveis_a07_f03_a_11: 8702156176576374356
+      des_jogos_disp_moveis_a07_f03_a_1: 2739784135627568257
+      des_jogos_disp_moveis_a07_f03_a_5: 7421469769596878353
+      des_jogos_disp_moveis_a07_f03_a_7: 4677301291409040401
+      des_jogos_disp_moveis_a07_f03_a_9: 6685534661058643837
+      des_jogos_disp_moveis_a07_f03_a_0: -7227300347274364039
+      des_jogos_disp_moveis_a07_f03_a_10: 6486434306259076130
+      des_jogos_disp_moveis_a07_f03_a_14: -6934206098195855997
+      des_jogos_disp_moveis_a07_f03_a_6: 3525372718372521292
+      des_jogos_disp_moveis_a07_f03_a_13: 6074303340020435897
+      des_jogos_disp_moveis_a07_f03_a_2: -2796038744257708754
+      des_jogos_disp_moveis_a07_f03_a_3: 1301409469521986076
+      des_jogos_disp_moveis_a07_f03_a_12: -6904599651513205947
+      des_jogos_disp_moveis_a07_f03_a_15: 8149091213641925724
+      des_jogos_disp_moveis_a07_f03_a_8: -2251286798359662164
+      des_jogos_disp_moveis_a07_f03_a_4: 7655905205988829936
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

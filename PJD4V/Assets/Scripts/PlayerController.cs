@@ -231,13 +231,7 @@ public class PlayerController : MonoBehaviour
                     }
                     else
                     {
-                        if (_canJetpack)
-                        {
-                            _canJetpack = false;
-                            _isJetpacking = true;
-                            jetEffect.SetActive(true);
-                            jetpackSFXSource.Play();
-                        }
+                        
                         
                         if (_canDoubleJump)
                         {
@@ -247,6 +241,13 @@ public class PlayerController : MonoBehaviour
                             normalSFXSource.PlayOneShot(playerSFX[0]);
                             
                             _canJetpack = true;
+                        } else if (_canJetpack)
+                        {
+                            _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, 0);
+                            _canJetpack = false;
+                            _isJetpacking = true;
+                            jetEffect.SetActive(true);
+                            jetpackSFXSource.Play();
                         }
                     }
                 }
@@ -375,7 +376,8 @@ public class PlayerController : MonoBehaviour
         _active = false;
         _dead = true;
 
-        _rigidbody2D.bodyType = RigidbodyType2D.Static;
+        //_rigidbody2D.bodyType = RigidbodyType2D.Static;
+        _rigidbody2D.velocity = new Vector2(0, _rigidbody2D.velocity.y);
         
         _animator.SetBool("Active", _active);
         _animator.Play("Dead");
@@ -406,28 +408,36 @@ public class PlayerController : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Kill"))
+        if (_active)
         {
-            if(other.contacts.Any(contact => Vector2.Angle(contact.normal, Vector2.up) < 20))
-                KillPlayer();
-        }
-
-        if (other.gameObject.CompareTag("TakeEnergy"))
-        {
-            _currentEnergy -= energyBitRecover;
-            HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
-
-            if(_isMovingRight)
-                KnockbackPlayer(Vector2.left + Vector2.up, 1);
-            else
+            if (other.gameObject.CompareTag("Kill"))
             {
-                KnockbackPlayer(Vector2.right + Vector2.up, 1);
+                if(other.contacts.Any(contact => Vector2.Angle(contact.normal, Vector2.up) < 20))
+                    KillPlayer();
+            }
+
+            if (other.gameObject.CompareTag("TakeEnergy"))
+            {
+                _currentEnergy -= energyBitRecover;
+                HUDObserverManager.PlayerEnergyChangedChannel(_currentEnergy);
+
+                if(_isMovingRight)
+                    KnockbackPlayer(Vector2.left + Vector2.up, 1);
+                else
+                {
+                    KnockbackPlayer(Vector2.right + Vector2.up, 1);
+                }
             }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (other.gameObject.CompareTag("Kill"))
+        {
+            KillPlayer();
+        }
+        
         if (other.CompareTag("Victory"))
         {
             PlayerVictory();
