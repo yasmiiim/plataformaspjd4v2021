@@ -135,4 +135,12 @@ public class EnemyController : MonoBehaviour
             other.gameObject.GetComponent<PlayerController>().TakeDamage(damage);
         }
     }
+    
+    private void OnCollisionStay2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            other.gameObject.GetComponent<PlayerController>().TakeDamage(damage);
+        }
+    }
 }
