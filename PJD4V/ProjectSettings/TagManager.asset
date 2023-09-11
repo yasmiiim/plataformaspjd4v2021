@@ -10,6 +10,7 @@ TagManager:
   - TakeEnergy
   - ExtraLife
   - PlayerBullet
+  - Coin
   layers:
   - Default
   - TransparentFX

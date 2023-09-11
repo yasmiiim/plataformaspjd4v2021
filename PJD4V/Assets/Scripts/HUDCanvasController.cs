@@ -9,7 +9,8 @@ public class HUDCanvasController : MonoBehaviour
 
     public GameObject livesObject;
     public GameObject energyBarObject;
-
+    public GameObject coinsObject;
+    
     private void OnEnable()
     {
         HUDObserverManager.ONActivateHUD += OnActivateHUD;
@@ -37,5 +38,6 @@ public class HUDCanvasController : MonoBehaviour
     {
         livesObject.SetActive(obj);
         energyBarObject.SetActive(obj);
+        coinsObject.SetActive(obj);
     }
 }

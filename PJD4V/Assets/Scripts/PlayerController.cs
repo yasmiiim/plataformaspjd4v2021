@@ -90,6 +90,8 @@ public class PlayerController : MonoBehaviour
     private bool _onKnockback;
     private float _currentKnockbackTime;
 
+    private int _coins;
+
     private void OnEnable()
     {
         playerInput.onActionTriggered += OnActionTriggered;
@@ -457,6 +459,14 @@ public class PlayerController : MonoBehaviour
         {
             GameManager.Instance.AddLife(1);
             
+            Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("Coin"))
+        {
+            _coins++;
+            HUDObserverManager.CoinsChanged(_coins);
+            normalSFXSource.PlayOneShot(playerSFX[4]);
             Destroy(other.gameObject);
         }
     }

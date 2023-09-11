@@ -39,4 +39,11 @@ public static class HUDObserverManager
     {
         ONActivateHUD?.Invoke(state);
     }
+
+    public static event Action<int> ONCoinsChanged;
+    
+    public static void CoinsChanged(int coins)
+    {
+        ONCoinsChanged?.Invoke(coins);
+    }
 }

@@ -23,5 +23,8 @@ public class BulletController : MonoBehaviour
     private void MoveBullet()
     {
         _rigidbody2D.velocity = transform.localScale.x * transform.right * moveSpeed * Time.fixedDeltaTime;
+        
+        
     }
+    
 }
