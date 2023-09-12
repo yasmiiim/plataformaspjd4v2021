@@ -545,12 +545,10 @@ public class PlayerController : MonoBehaviour
 
         if (other.CompareTag("Door"))
         {
-            if (_hasKey)
-            {
-                other.GetComponent<KeyDoorController>().UseKey();
-                _hasKey = false;
-                HUDObserverManager.KeyChanged(_hasKey);
-            }
+            if (!_hasKey) return;
+            if (!other.GetComponent<KeyDoorController>().UseKey()) return;
+            _hasKey = false;
+            HUDObserverManager.KeyChanged(_hasKey);
         }
     }
 

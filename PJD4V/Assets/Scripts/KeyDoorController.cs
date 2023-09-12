@@ -5,9 +5,16 @@ using UnityEngine;
 public class KeyDoorController : MonoBehaviour
 {
 
-    public void UseKey()
+    private bool _isOpen;
+    
+    public bool UseKey()
     {
+        if (_isOpen) return false;
+        
         GetComponent<Animator>().Play("Opening");
         GetComponent<AudioSource>().Play();
+        _isOpen = true;
+        return true;
+
     }
 }
