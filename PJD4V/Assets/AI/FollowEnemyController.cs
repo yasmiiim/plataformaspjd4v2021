@@ -9,13 +9,13 @@ namespace AI
         public int damage;
         public float moveSpeed;
         
-        private Transform playerTransform;
+        public Transform playerTransform;
 
-        [SerializeField] private Transform[] patrolPoints;
+        public Transform[] patrolPoints;
 
         [SerializeField] private Animator childAnim;
 
-        private Vector3 patrolCenter;
+        public Vector3 patrolCenter;
 
         private Animator _animator;
         
@@ -46,6 +46,8 @@ namespace AI
             }
 
             patrolCenter /= patrolPoints.Length;
+            
+            _currentEnergy = maxEnergy;
         }
 
         // Update is called once per frame
@@ -67,6 +69,7 @@ namespace AI
                 _isAlive = false;
                 _collider2D.enabled = false;
                 childAnim.Play("Dead");
+                _animator.Play("Dead");
                 _audioSource.Play();
             }
 
